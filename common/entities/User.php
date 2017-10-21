@@ -1,5 +1,5 @@
 <?php
-namespace common\models;
+namespace common\entities;
 
 use Yii;
 use yii\base\NotSupportedException;
@@ -23,7 +23,7 @@ use yii\web\IdentityInterface;
  */
 class User extends ActiveRecord implements IdentityInterface
 {
-    const STATUS_DELETED = 0;
+    const STATUS_WAIT = 0;
     const STATUS_ACTIVE = 10;
 
 
@@ -185,5 +185,21 @@ class User extends ActiveRecord implements IdentityInterface
     public function removePasswordResetToken()
     {
         $this->password_reset_token = null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isActive(): bool
+    {
+        return $this->status === self::STATUS_ACTIVE;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isWait(): bool
+    {
+        return $this->status === self::STATUS_WAIT;
     }
 }
