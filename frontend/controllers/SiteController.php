@@ -1,6 +1,7 @@
 <?php
 namespace frontend\controllers;
 
+use frontend\services\PasswordResetService;
 use frontend\services\SignupService;
 use Yii;
 use yii\base\InvalidParamException;
@@ -174,19 +175,21 @@ class SiteController extends Controller
      */
     public function actionRequestPasswordReset()
     {
-        $model = new PasswordResetRequestForm();
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            if ($model->sendEmail()) {
-                Yii::$app->session->setFlash('success', 'Check your email for further instructions.');
-
+        $form = new PasswordResetRequestForm();
+        if ($form->load(\Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $service = new PasswordResetService();
+                $service->request($form);
+                \Yii::$app->session->setFlash('success', 'Check your email');
                 return $this->goHome();
-            } else {
-                Yii::$app->session->setFlash('error', 'Sorry, we are unable to reset password for the provided email address.');
+            } catch (\DomainException $e) {
+                \Yii::$app->session->setFlash('error', $e->getMessage());
+                \Yii::$app->errorHandler->logException($e);
             }
         }
 
         return $this->render('requestPasswordResetToken', [
-            'model' => $model,
+            'model' => $form,
         ]);
     }
 
@@ -199,20 +202,17 @@ class SiteController extends Controller
      */
     public function actionResetPassword($token)
     {
-        try {
-            $model = new ResetPasswordForm($token);
-        } catch (InvalidParamException $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        }
+        $form = new ResetPasswordForm();
 
-        if ($model->load(Yii::$app->request->post()) && $model->validate() && $model->resetPassword()) {
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            $service = new PasswordResetService();
+            $service->reset($token, $form);
             Yii::$app->session->setFlash('success', 'New password saved.');
-
             return $this->goHome();
         }
 
         return $this->render('resetPassword', [
-            'model' => $model,
+            'model' => $form,
         ]);
     }
 }

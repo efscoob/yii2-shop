@@ -6,6 +6,8 @@ use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
+use yii\base\InvalidParamException;
+
 
 /**
  * User model
@@ -116,13 +118,36 @@ class User extends ActiveRecord implements IdentityInterface
     public static function findByPasswordResetToken($token)
     {
         if (!static::isPasswordResetTokenValid($token)) {
-            return null;
+            throw new InvalidParamException('Wrong password reset token');
         }
 
         return static::findOne([
             'password_reset_token' => $token,
             'status' => self::STATUS_ACTIVE,
         ]);
+    }
+
+    /**
+     * Validate and generates new password reset token
+     */
+    public function requestPasswordReset(): void
+    {
+        if (!empty($this->password_reset_token) && self::isPasswordResetTokenValid($this->password_reset_token)) {
+            throw new \DomainException('Password request token is already sent');
+        }
+        $this->password_reset_token = \Yii::$app->security->generateRandomString() . '_' . time();
+    }
+
+    /**
+     * Reset password
+     * @param string $password
+     */
+    public function resetPassword(string $password) {
+        if (empty($this->password_reset_token)) {
+            throw new \DomainException('Password resetting is not requested.');
+        }
+        $this->setPassword($password);
+        $this->password_reset_token = null;
     }
 
     /**
@@ -185,22 +210,6 @@ class User extends ActiveRecord implements IdentityInterface
     public function setPassword($password)
     {
         $this->password_hash = Yii::$app->security->generatePasswordHash($password);
-    }
-
-    /**
-     * Generates new password reset token
-     */
-    public function generatePasswordResetToken()
-    {
-        $this->password_reset_token = Yii::$app->security->generateRandomString() . '_' . time();
-    }
-
-    /**
-     * Removes password reset token
-     */
-    public function removePasswordResetToken()
-    {
-        $this->password_reset_token = null;
     }
 
     /**
