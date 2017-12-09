@@ -7,10 +7,17 @@ use frontend\forms\PasswordResetRequestForm;
 use frontend\forms\ResetPasswordForm;
 use common\entities\User;
 use Symfony\Component\Yaml\Exception\RuntimeException;
-use yii\base\InvalidParamException;
+use yii\mail\MailerInterface;
 
 class PasswordResetService
 {
+    private $mailer;
+
+    public function __construct(MailerInterface $mailer)
+    {
+        $this->mailer = $mailer;
+    }
+
     public function validateToken(string $token): void
     {
         if (empty($token) || !is_string($token)) {
@@ -30,12 +37,12 @@ class PasswordResetService
         }
         $user->requestPasswordReset();
         $user->save();
-        $sent = \Yii::$app->mailer
+        $sent = $this->mailer
             ->compose(
                 ['html' => 'passwordResetToken-html', 'text' => 'passwordResetToken-text'],
                 ['user' => $user]
             )
-            ->setFrom([\Yii::$app->params['supportEmail'] => $user->username . ' robot'])
+            //->setFrom([\Yii::$app->params['supportEmail'] => $user->username . ' robot'])
             ->setTo($user->email)
             ->setSubject('Reset password for ' . $user->email)
             ->send();
