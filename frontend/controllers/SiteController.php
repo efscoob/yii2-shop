@@ -1,8 +1,10 @@
 <?php
 namespace frontend\controllers;
 
+use frontend\services\ContactService;
 use frontend\services\PasswordResetService;
 use frontend\services\SignupService;
+use Symfony\Component\Yaml\Exception\RuntimeException;
 use Yii;
 use yii\base\InvalidParamException;
 use yii\web\BadRequestHttpException;
@@ -117,19 +119,21 @@ class SiteController extends Controller
      */
     public function actionContact()
     {
-        $model = new ContactForm();
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            if ($model->sendEmail(Yii::$app->params['adminEmail'])) {
-                Yii::$app->session->setFlash('success', 'Thank you for contacting us. We will respond to you as soon as possible.');
-            } else {
-                Yii::$app->session->setFlash('error', 'There was an error sending your message.');
+        $form = new ContactForm();
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $service = new ContactService(Yii::$app->mailer);
+                $service->sendEmail($form);
+            } catch (\Exception $e) {
+                Yii::$app->errorHandler->logException($e);
+                Yii::$app->session->setFlash("error", $e->getMessage());
             }
 
             return $this->refresh();
         }
 
         return $this->render('contact', [
-            'model' => $model,
+            'model' => $form,
         ]);
     }
 
@@ -205,10 +209,15 @@ class SiteController extends Controller
         $form = new ResetPasswordForm();
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-            $service = new PasswordResetService(\Yii::$app->mailer);
-            $service->reset($token, $form);
-            Yii::$app->session->setFlash('success', 'New password saved.');
-            return $this->goHome();
+            try {
+                $service = new PasswordResetService(\Yii::$app->mailer);
+                $service->reset($token, $form);
+                Yii::$app->session->setFlash('success', 'New password saved.');
+                return $this->goHome();
+            } catch (\Exception $e) {
+                \Yii::$app->session->setFlash('error', $e->getMessage());
+                \Yii::$app->errorHandler->logException($e);
+            }
         }
 
         return $this->render('resetPassword', [
