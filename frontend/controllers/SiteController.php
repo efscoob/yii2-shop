@@ -7,6 +7,7 @@ use frontend\services\SignupService;
 use Symfony\Component\Yaml\Exception\RuntimeException;
 use Yii;
 use yii\base\InvalidParamException;
+use yii\base\Module;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -22,6 +23,14 @@ use frontend\forms\ContactForm;
  */
 class SiteController extends Controller
 {
+    private $service_signup;
+
+    public function __construct($id, Module $module, array $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->service_signup = new SignupService(Yii::$app->mailer);
+    }
+
     /**
      * @inheritdoc
      */
@@ -70,7 +79,7 @@ class SiteController extends Controller
     }
 
     /**
-     * Displays homepage.
+     * Displays homepage.`
      *
      * @return mixed
      */
@@ -157,11 +166,9 @@ class SiteController extends Controller
         $form = new SignupForm();
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
-                $service = new SignupService();
-                $user = $service->signup($form);
-                if (Yii::$app->getUser()->login($user)) {
-                    return $this->goHome();
-                }
+                $this->service_signup->signup($form);
+                Yii::$app->session->setFlash('success', 'Check email for further info');
+                return $this->goHome();
             } catch(\DomainException $e) {
                 Yii::$app->session->setFlash('error', $e->getMessage());
             }
@@ -172,6 +179,22 @@ class SiteController extends Controller
         ]);
     }
 
+    public function actionConfirm(string $token)
+    {
+        try {
+            $user = $this->service_signup->confirm($token);
+            Yii::$app->session->setFlash('success', 'Email was confirmed');
+            if (Yii::$app->getUser()->login($user)) {
+                return $this->goHome();
+            }
+        } catch (\Exception $e) {
+            Yii::$app->session->setFlash('error', $e->getMessage());
+            Yii::$app->errorHandler->logException($e);
+        }
+
+        return $this->redirect('login');
+    }
+
     /**
      * Requests password reset.
      *
@@ -180,15 +203,15 @@ class SiteController extends Controller
     public function actionRequestPasswordReset()
     {
         $form = new PasswordResetRequestForm();
-        if ($form->load(\Yii::$app->request->post()) && $form->validate()) {
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 $service = new PasswordResetService(\Yii::$app->mailer);
                 $service->request($form);
-                \Yii::$app->session->setFlash('success', 'Check your email');
+                Yii::$app->session->setFlash('success', 'Check your email');
                 return $this->goHome();
             } catch (\DomainException $e) {
-                \Yii::$app->session->setFlash('error', $e->getMessage());
-                \Yii::$app->errorHandler->logException($e);
+                Yii::$app->session->setFlash('error', $e->getMessage());
+                Yii::$app->errorHandler->logException($e);
             }
         }
 

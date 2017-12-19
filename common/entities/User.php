@@ -17,6 +17,7 @@ use yii\base\InvalidParamException;
  * @property string $password_hash
  * @property string $password_reset_token
  * @property string $email
+ * @property string $email_confirm_token
  * @property string $auth_key
  * @property integer $status
  * @property integer $created_at
@@ -60,7 +61,7 @@ class User extends ActiveRecord implements IdentityInterface
 
     public static function create(string $username, string $email, string $password): self
     {
-        $user = new static();
+        $user = new User();
         $user->username = $username;
         $user->email = $email;
         $user->setPassword($password);
@@ -125,6 +126,37 @@ class User extends ActiveRecord implements IdentityInterface
             'password_reset_token' => $token,
             'status' => self::STATUS_ACTIVE,
         ]);
+    }
+
+    public static function findByEmailConfirmToken($token): User
+    {
+        return static::findOne([
+            'email_confirm_token' => $token,
+            'status' => self::STATUS_WAIT,
+        ]);
+    }
+
+    public static function requestSignup(string $username, string $email, string $password): User
+    {
+        $user = new static();
+        $user->username = $username;
+        $user->email = $email;
+        $user->setPassword($password);
+        $user->status = self::STATUS_WAIT;
+        $user->created_at = time();
+        $user->email_confirm_token = Yii::$app->security->generateRandomString();
+        $user->auth_key = Yii::$app->security->generateRandomString();
+
+        return $user;
+    }
+
+    public function confirmSignup(): void
+    {
+        if (!$this->isWait()) {
+            throw new \DomainException('User is already active');
+        }
+        $this->status = self::STATUS_ACTIVE;
+        $this->email_confirm_token = null;
     }
 
     /**
