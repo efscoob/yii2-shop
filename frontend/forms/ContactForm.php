@@ -12,7 +12,6 @@ class ContactForm extends Model
 {
     public $name;
     public $email;
-    public $adminEmail;
     public $subject;
     public $body;
     public $verifyCode;

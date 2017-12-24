@@ -15,9 +15,11 @@ use yii\mail\MailerInterface;
 class ContactService
 {
     private $mailer;
+    public $adminEmail;
 
-    public function __construct(MailerInterface $mailer)
+    public function __construct($adminEmail, MailerInterface $mailer)
     {
+        $this->adminEmail = $adminEmail;
         $this->mailer = $mailer;
     }
 
@@ -27,7 +29,7 @@ class ContactService
     public function sendEmail(ContactForm $form): void
     {
        $send = $this->mailer->compose()
-            ->setTo($form->adminEmail)
+            ->setTo($this->adminEmail)
             ->setFrom([$form->email => $form->name])
             ->setSubject($form->subject)
             ->setTextBody($form->body)

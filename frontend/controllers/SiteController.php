@@ -8,6 +8,7 @@ use Symfony\Component\Yaml\Exception\RuntimeException;
 use Yii;
 use yii\base\InvalidParamException;
 use yii\base\Module;
+use yii\mail\MailerInterface;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -28,7 +29,7 @@ class SiteController extends Controller
     public function __construct($id, Module $module, array $config = [])
     {
         parent::__construct($id, $module, $config);
-        $this->service_signup = new SignupService(Yii::$app->mailer);
+        $this->service_signup = Yii::$container->get(SignupService::class);
     }
 
     /**
@@ -131,8 +132,9 @@ class SiteController extends Controller
         $form = new ContactForm();
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
-                $service = new ContactService(Yii::$app->mailer);
+                $service = Yii::$container->get(ContactService::class);
                 $service->sendEmail($form);
+                Yii::$app->session->setFlash('success', 'Email send to our support successfully.');
             } catch (\Exception $e) {
                 Yii::$app->errorHandler->logException($e);
                 Yii::$app->session->setFlash("error", $e->getMessage());
