@@ -207,7 +207,8 @@ class SiteController extends Controller
         $form = new PasswordResetRequestForm();
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
-                $service = new PasswordResetService(\Yii::$app->mailer);
+                //$service = new PasswordResetService(\Yii::$app->mailer);
+                $service = Yii::$container->get(PasswordResetService::class);
                 $service->request($form);
                 Yii::$app->session->setFlash('success', 'Check your email');
                 return $this->goHome();
@@ -235,7 +236,7 @@ class SiteController extends Controller
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
-                $service = new PasswordResetService(\Yii::$app->mailer);
+                $service = Yii::$container->get(PasswordResetService::class);
                 $service->reset($token, $form);
                 Yii::$app->session->setFlash('success', 'New password saved.');
                 return $this->goHome();

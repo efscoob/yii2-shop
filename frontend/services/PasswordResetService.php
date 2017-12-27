@@ -3,18 +3,22 @@
 namespace frontend\services;
 
 
+use common\repositories\UsersRepository;
 use frontend\forms\PasswordResetRequestForm;
 use frontend\forms\ResetPasswordForm;
 use common\entities\User;
 use Symfony\Component\Yaml\Exception\RuntimeException;
+use yii\base\InvalidParamException;
 use yii\mail\MailerInterface;
 
 class PasswordResetService
 {
     private $mailer;
+    private $users;
 
-    public function __construct(MailerInterface $mailer)
+    public function __construct(UsersRepository $users, MailerInterface $mailer)
     {
+        $this->users = $users;
         $this->mailer = $mailer;
     }
 
@@ -24,19 +28,19 @@ class PasswordResetService
             throw new \DomainException('Token error - password reset token cannot be blank');
         }
 
-        if (User::findByPasswordResetToken($token)) {
+        if (!$this->users->getByPasswordResetToken($token)) {
             throw new \DomainException('Reset token error');
         }
     }
 
     public function request(PasswordResetRequestForm $form): void
     {
-        $user = User::findByEmail($form->email);
+        $user = $this->users->getByEmail($form->email);
         if (!$user->isActive()) {
             throw new \DomainException('User not active');
         }
         $user->requestPasswordReset();
-        $user->save();
+        $this->users->save($user);
         $sent = $this->mailer
             ->compose(
                 ['html' => 'passwordResetToken-html', 'text' => 'passwordResetToken-text'],
@@ -53,8 +57,8 @@ class PasswordResetService
 
     public function reset(string $token, ResetPasswordForm $form): void
     {
-        $user = User::findByPasswordResetToken($token);
+        $user = $this->users->getByPasswordResetToken($token);
         $user->resetPassword($form->password);
-        $user->save();
+        $this->users->save($user);
     }
 }

@@ -3,6 +3,7 @@
 namespace frontend\services;
 
 
+use common\repositories\UsersRepository;
 use frontend\forms\SignupForm;
 use common\entities\User;
 use yii\mail\MailerInterface;
@@ -10,26 +11,23 @@ use yii\mail\MailerInterface;
 class SignupService
 {
     private $mailer;
+    private $users;
 
-    public function __construct(MailerInterface $mailer)
+    public function __construct(UsersRepository $users, MailerInterface $mailer)
     {
+        $this->users = $users;
         $this->mailer = $mailer;
     }
 
     public function signup(SignupForm $form): void
     {
-        if (User::findByUsername($form->username)) {
-            throw new \DomainException('Username is already exists');
-        }
-        if (User::findByEmail($form->email)) {
-            throw new \DomainException('Email is already exists');
+        if ($this->users->findByUsernameOrEmail($form->username, $form->email)) {
+            throw new \DomainException('Username or email is already exists');
         }
 
         $user = User::requestSignup($form->username, $form->email, $form->password);
 
-        if (!$user->save()) {
-            throw new \RuntimeException('Saving error');
-        }
+        $this->users->save($user);
 
         $send = $this->mailer
             ->compose(
@@ -49,16 +47,13 @@ class SignupService
         if (empty($token)) {
             throw new \DomainException('Token is empty');
         }
-        $user = User::findByEmailConfirmToken($token);
+        $user = $this->users->getByEmailConfirmToken($token);
         if (!$user) {
             throw new \DomainException('Coudnt find User with token = ' . $token);
         }
 
         $user->confirmSignup();
-
-        if (!$user->save()) {
-            throw new \RuntimeException('Saving error');
-        }
+        $this->users->save($user);
 
         return $user;
     }

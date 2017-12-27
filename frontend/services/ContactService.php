@@ -15,7 +15,7 @@ use yii\mail\MailerInterface;
 class ContactService
 {
     private $mailer;
-    public $adminEmail;
+    private $adminEmail;
 
     public function __construct($adminEmail, MailerInterface $mailer)
     {

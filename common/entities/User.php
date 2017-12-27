@@ -6,7 +6,6 @@ use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
-use yii\base\InvalidParamException;
 
 
 /**
@@ -72,68 +71,14 @@ class User extends ActiveRecord implements IdentityInterface
         return $user;
     }
 
-    /**
-     * @inheritdoc
-     */
     public static function findIdentity($id)
     {
         return static::findOne(['id' => $id, 'status' => self::STATUS_ACTIVE]);
     }
 
-    /**
-     * @inheritdoc
-     */
     public static function findIdentityByAccessToken($token, $type = null)
     {
         throw new NotSupportedException('"findIdentityByAccessToken" is not implemented.');
-    }
-
-    /**
-     * Finds user by username
-     *
-     * @param string $username
-     * @return static|null
-     */
-    public static function findByUsername(string $username)
-    {
-        return static::findOne(['username' => $username, 'status' => self::STATUS_ACTIVE]);
-    }
-
-    /**
-     * Finds user by email
-     *
-     * @param string $email
-     * @return static|null
-     */
-    public static function findByEmail(string $email)
-    {
-        return static::findOne(['email' => $email, 'status' => self::STATUS_ACTIVE]);
-    }
-
-    /**
-     * Finds user by password reset token
-     *
-     * @param string $token password reset token
-     * @return static|null
-     */
-    public static function findByPasswordResetToken($token)
-    {
-        if (!static::isPasswordResetTokenValid($token)) {
-            throw new InvalidParamException('Wrong password reset token');
-        }
-
-        return static::findOne([
-            'password_reset_token' => $token,
-            'status' => self::STATUS_ACTIVE,
-        ]);
-    }
-
-    public static function findByEmailConfirmToken($token): User
-    {
-        return static::findOne([
-            'email_confirm_token' => $token,
-            'status' => self::STATUS_WAIT,
-        ]);
     }
 
     public static function requestSignup(string $username, string $email, string $password): User
