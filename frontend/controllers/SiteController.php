@@ -1,6 +1,7 @@
 <?php
 namespace frontend\controllers;
 
+use frontend\services\AuthService;
 use frontend\services\ContactService;
 use frontend\services\PasswordResetService;
 use frontend\services\SignupService;
@@ -8,6 +9,7 @@ use Symfony\Component\Yaml\Exception\RuntimeException;
 use Yii;
 use yii\base\InvalidParamException;
 use yii\base\Module;
+use yii\db\Exception;
 use yii\mail\MailerInterface;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
@@ -100,13 +102,21 @@ class SiteController extends Controller
             return $this->goHome();
         }
 
-        $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
+        $form = new LoginForm();
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $service = Yii::$container->get(AuthService::class);
+                $user = $service->auth($form);
+                Yii::$app->user->login($user, $form->rememberMe ? Yii::$app->params['user.rememberMeDuration'] : 0);
+                return $this->goBack();
+            } catch (Exception $e) {
+                Yii::$app->session->setFlash('error', 'Wrong username or password. Try again.');
+                Yii::$app->errorHandler->logException($e);
+            }
         }
 
         return $this->render('login', [
-            'model' => $model,
+            'model' => $form,
         ]);
     }
 

@@ -7,11 +7,11 @@ use yii\base\InvalidParamException;
 
 class UsersRepository
 {
-    public function findByUsernameOrEmail(string $username, string $email): ?User
+    public function findByUsernameOrEmail(string $username, string $email = ''): ?User
     {
         $user = $this->getBy(['username' => $username]);
         if (!$user) {
-            return $this->getBy(['username' => $email]);
+            return $this->getBy(['email' => $email]);
         }
         return $user;
     }
