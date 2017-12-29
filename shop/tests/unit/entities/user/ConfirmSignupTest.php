@@ -1,6 +1,6 @@
 <?php
 
-namespace common\tests\unit\entities;
+namespace shop\tests\unit\entities\user;
 
 use Codeception\Test\Unit;
 use shop\entities\user\User;
@@ -27,7 +27,9 @@ class ConfirmSignupTest extends Unit
             'status' => User::STATUS_ACTIVE,
             'email_confirm_token' => null,
         ]);
-        $this->expectExceptionMessage('User is already active');
+
+        $this->expectExceptionMessage('User is already active.');
+
         $user->confirmSignup();
     }
 }

@@ -1,11 +1,11 @@
 <?php
 
-namespace frontend\services;
+namespace shop\services\auth;
 
 
-use common\repositories\UsersRepository;
-use frontend\forms\SignupForm;
-use common\entities\User;
+use shop\repositories\UsersRepository;
+use shop\forms\auth\SignupForm;
+use shop\entities\user\User;
 use yii\mail\MailerInterface;
 
 class SignupService

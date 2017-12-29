@@ -1,11 +1,11 @@
 <?php
 
-namespace frontend\services;
+namespace shop\services\auth;
 
 
-use common\entities\User;
-use common\forms\LoginForm;
-use common\repositories\UsersRepository;
+use shop\entities\user\User;
+use shop\forms\auth\LoginForm;
+use shop\repositories\UsersRepository;
 
 class AuthService
 {

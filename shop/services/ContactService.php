@@ -1,15 +1,9 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Johnny
- * Date: 09.12.2017
- * Time: 19:34
- */
 
-namespace frontend\services;
+namespace shop\services;
 
 
-use frontend\forms\ContactForm;
+use shop\forms\ContactForm;
 use yii\mail\MailerInterface;
 
 class ContactService

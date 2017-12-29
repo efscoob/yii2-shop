@@ -1,14 +1,13 @@
 <?php
 
-namespace frontend\services;
+namespace shop\services\auth;
 
 
-use common\repositories\UsersRepository;
-use frontend\forms\PasswordResetRequestForm;
-use frontend\forms\ResetPasswordForm;
-use common\entities\User;
+use shop\repositories\UsersRepository;
+use shop\forms\auth\PasswordResetRequestForm;
+use shop\forms\auth\ResetPasswordForm;
+use shop\entities\user\User;
 use Symfony\Component\Yaml\Exception\RuntimeException;
-use yii\base\InvalidParamException;
 use yii\mail\MailerInterface;
 
 class PasswordResetService
