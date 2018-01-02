@@ -9,9 +9,9 @@ class UsersRepository
 {
     public function findByUsernameOrEmail(string $username, string $email = ''): ?User
     {
-        $user = $this->getBy(['username' => $username]);
+        $user = User::findOne(['username' => $username]);
         if (!$user) {
-            return $this->getBy(['email' => $email]);
+            return User::findOne(['email' => $email]);
         }
         return $user;
     }

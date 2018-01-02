@@ -42,7 +42,7 @@ class PasswordResetService
         $this->users->save($user);
         $sent = $this->mailer
             ->compose(
-                ['html' => 'passwordResetToken-html', 'text' => 'passwordResetToken-text'],
+                ['html' => 'auth/reset/passwordResetToken-html', 'text' => 'auth/reset/passwordResetToken-text'],
                 ['user' => $user]
             )
             //->setFrom([\Yii::$app->params['supportEmail'] => $user->username . ' robot'])
