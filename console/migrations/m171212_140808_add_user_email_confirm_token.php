@@ -13,15 +13,4 @@ class m171212_140808_add_user_email_confirm_token extends Migration
     {
         $this->dropColumn('{{%user}}', 'email_confirm_token');
     }
-
-    /*
-    // Use safeUp/safeDown to run migration code within a transaction
-    public function safeUp()
-    {
-    }
-
-    public function safeDown()
-    {
-    }
-    */
 }
