@@ -25,15 +25,18 @@ class Network extends ActiveRecord
         $item->network = $network;
 
         return $item;
-//        $item = new static();
-//        $item->identity = $identity;
-//        $item->network = $network;
-//
-//        return $item;
     }
 
     public static function tableName()
     {
         return '{{%user_networks}}';
+    }
+
+    public function isAlreadyExists($identity, $network): bool
+    {
+        if ($this->identity == $identity && $this->network == $network) {
+            return true;
+        }
+        return false;
     }
 }

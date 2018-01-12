@@ -30,4 +30,14 @@ class NetworkService
         $this->users->save($user);
         return $user;
     }
+
+    public function attach($id, $identity, $network): void
+    {
+        if ($this->users->findByNetworkIdentity($identity, $network)) {
+            throw new \DomainException('Network is already attached');
+        }
+        $user = $this->users->get($id);
+        $user->attachNetwork($identity, $network);
+        $this->users->save($user);
+    }
 }

@@ -116,6 +116,18 @@ class User extends ActiveRecord implements IdentityInterface
 
     }
 
+    public function attachNetwork($identity, $network): void
+    {
+        $networks = $this->networks;
+        foreach ($networks as $item) {
+            if ($item->isAlreadyExists($identity, $network)) {
+                throw new \DomainException('Network is already attached');
+            }
+        }
+        $networks[] = Network::create($identity, $network);
+        $this->networks = $networks;
+    }
+
     public static function requestSignup(string $username, string $email, string $password): User
     {
         $user = new static();
