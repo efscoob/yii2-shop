@@ -53,17 +53,6 @@ class User extends ActiveRecord implements IdentityInterface
         ];
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function rules()
-    {
-        return [
-            ['status', 'default', 'value' => self::STATUS_ACTIVE],
-            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_WAIT]],
-        ];
-    }
-
     public function transactions()
     {
         return [
@@ -97,12 +86,19 @@ class User extends ActiveRecord implements IdentityInterface
         $user = new User();
         $user->username = $username;
         $user->email = $email;
-        $user->setPassword($password);
+        $user->setPassword($password ?? Yii::$app->security->generateRandomString());
         $user->status = self::STATUS_ACTIVE;
         $user->created_at = time();
         $user->auth_key = Yii::$app->security->generateRandomString();
 
         return $user;
+    }
+
+    public function edit(string $username, string $email): void
+    {
+        $this->username = $username;
+        $this->email = $email;
+        $this->updated_at = time();
     }
 
     public static function signupByNetwork($identity, $network): self
@@ -112,6 +108,7 @@ class User extends ActiveRecord implements IdentityInterface
         $user->status = self::STATUS_ACTIVE;
         $user->auth_key = Yii::$app->security->generateRandomString();
         $user->networks = [Network::create($identity, $network)];
+
         return $user;
 
     }

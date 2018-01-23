@@ -69,13 +69,6 @@ class UsersRepository
         ]);
     }
 
-    public function save(User $user):void
-    {
-        if (!$user->save()) {
-            throw new \RuntimeException();
-        }
-    }
-
     private function getBy(array $condition): User
     {
         $user = User::findOne($condition);
@@ -84,5 +77,19 @@ class UsersRepository
         }
 
         return $user;
+    }
+
+    public function save(User $user):void
+    {
+        if (!$user->save()) {
+            throw new \RuntimeException();
+        }
+    }
+
+    public function remove(User $user): void
+    {
+        if (!$user->delete()) {
+            throw new \RuntimeException('Removing error');
+        }
     }
 }

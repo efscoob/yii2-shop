@@ -25,7 +25,6 @@ class NetworkController extends Controller
     {
         return [
             'attach' => [
-                'class' => AuthAction::class,
                 'successCallback' => [$this, 'onAuthSuccess'],
                 'successUrl' => Url::to(['cabinet/default/index']),
             ],
