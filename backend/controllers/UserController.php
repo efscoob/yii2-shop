@@ -22,8 +22,8 @@ class UserController extends Controller
 
     public function __construct($id, Module $module, UserManageService $service, array $config = [])
     {
-        $this->service = $service;
         parent::__construct($id, $module, $config);
+        $this->service = $service;
     }
 
     /**
