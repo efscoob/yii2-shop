@@ -2,6 +2,7 @@
 
 namespace common\bootstrap;
 
+use shop\entities\news\RssNews;
 use shop\services\ContactService;
 use yii\base\BootstrapInterface;
 use yii\mail\MailerInterface;
@@ -17,6 +18,10 @@ class SetUp implements BootstrapInterface
 
         $container->setSingleton(ContactService::class, [], [
             $app->params['adminEmail']
+        ]);
+
+        $container->setSingleton(RssNews::class, [], [
+            $app->params['newsJsonPath'],
         ]);
     }
 }

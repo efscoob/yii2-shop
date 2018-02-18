@@ -15,7 +15,12 @@ return [
         'fixture' => [
             'class' => 'yii\console\controllers\FixtureController',
             'namespace' => 'common\fixtures',
-          ],
+        ],
+        'migrate-db2' => [
+            'class' => 'yii\console\controllers\MigrateController',
+            'db' => 'db2',
+            'migrationPath' => '@console/migrations/db2',
+        ],
     ],
     'components' => [
         'log' => [

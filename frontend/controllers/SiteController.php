@@ -1,6 +1,7 @@
 <?php
 namespace frontend\controllers;
 
+use shop\services\news\RssNewsService;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 
@@ -47,7 +48,13 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        $service = new RssNewsService();
+        $news = $service->getRandomNews();
+
+        return $this->render('index', [
+            'title' => $news->title,
+            'description' => $news->description
+        ]);
     }
 
     /**
