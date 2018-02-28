@@ -1,6 +1,8 @@
 <?php
 namespace frontend\controllers;
 
+use shop\forms\NewsSearch;
+use shop\services\news\NewsSearchService;
 use shop\services\news\RssNewsService;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -48,12 +50,26 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        $service = new RssNewsService();
-        $news = $service->getRandomNews();
+        $newsService = new RssNewsService();
+        $news = $newsService->getRandomNews();
+
+        $form = new NewsSearch();
+        $result = [];
+
+        if ($form->load(\Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $searchService = new NewsSearchService();
+                $result = $searchService->searchSphinx($form->keyword);
+            } catch (\Exception $e) {
+                echo $e->getMessage();die;
+            }
+        }
 
         return $this->render('index', [
             'title' => $news->title,
-            'description' => $news->description
+            'description' => $news->description,
+            'model' => $form,
+            'result' => $result,
         ]);
     }
 

@@ -2,5 +2,8 @@
   "vz": "https://vz.ru/rss.xml",
   "interfax": "http://www.interfax.ru/rss.asp",
   "russian.rt": "https://russian.rt.com/rss",
+  "lenta": "https://lenta.ru/rss",
+  "rain": "https://tvrain.ru/export/rss/all.xml",
+  "vedomosti": "https://www.vedomosti.ru/rss/news",
   "rt.com": "https://www.rt.com/rss/"
 }

@@ -4,7 +4,7 @@ $jsonFile = __DIR__ . "/rss-links.json";
 
 $links = json_decode(file_get_contents($jsonFile), true);
 if (!$links) {
-    echo "JSON load error";
+    die('JSON load error');
 }
 
 $config = include(__DIR__ . "/config/db.php");
@@ -21,6 +21,7 @@ foreach ($links as $key => $link) {
 
     if (!$sxml = simplexml_load_file($link)) {
         echo 'RSS load error';
+        continue;
     }
     $title = strip_tags($sxml[0]->channel->item[0]->title);
     $desc = strip_tags($sxml[0]->channel->item[0]->description);
@@ -43,4 +44,6 @@ foreach ($links as $key => $link) {
     }
 }
 
-file_put_contents(__DIR__ . "/news-current.json", json_encode($news));
+if ($news[0]['title']) {
+    file_put_contents(__DIR__ . "/news-current.json", json_encode($news));
+}
